@@ -8,6 +8,8 @@
 #   make alu8         - compila y corre alu8_tb (alu8/), reporta PASS/FAIL
 #   make wave-alu8    - corre alu8 y abre alu8/alu8_tb.vcd en Surfer
 #   make view-alu8    - abre alu8/waveform.vcd incluido, sin simular
+#   make core-min     - compila y corre core_min_tb: nucleo RV32I minimo (add/sub/addi)
+#   make wave-core-min   - corre core-min y abre la onda en Surfer
 #   make clean        - borra binarios y ondas generadas
 #
 # Nota: el proyecto vive bajo una ruta con espacios (iCloud Drive), y el
@@ -17,8 +19,9 @@
 BUILD_DIR  := $(HOME)/verilator_builds
 LZ4_PREFIX := /opt/homebrew/opt/lz4
 
-ADDERS_DIR := adders
-ALU8_DIR   := alu8
+ADDERS_DIR   := adders
+ALU8_DIR     := alu8
+CORE_MIN_DIR := core_min
 
 VLFLAGS := --binary --timing -sv --trace-fst \
            -Wno-IEEEMAYDEPRECATE -Wno-TIMESCALEMOD -Wno-WIDTHTRUNC -Wno-WIDTHEXPAND \
@@ -36,7 +39,13 @@ ADDERS_SRCS := $(ADDERS_DIR)/half_adder.sv $(ADDERS_DIR)/full_adder.sv \
                $(ADDERS_DIR)/ripple_carry_adder.sv $(ADDERS_DIR)/adders_tb.sv
 ALU8_SRCS   := $(ALU8_DIR)/alu8.v $(ALU8_DIR)/alu8_tb.v
 
-.PHONY: adders wave-adders view alu8 wave-alu8 view-alu8 clean
+CORE_MIN_SRCS   := $(CORE_MIN_DIR)/risc_v_32_i_pkg.sv $(CORE_MIN_DIR)/ArithmeticLogicUnit.sv \
+                    $(CORE_MIN_DIR)/ImmediateSignExtend.sv $(CORE_MIN_DIR)/RegisterFile.sv \
+                    $(CORE_MIN_DIR)/CoreControlUnit_min.sv $(CORE_MIN_DIR)/InstructionMemory_min.sv \
+                    $(CORE_MIN_DIR)/ProcessorCoreMin.sv $(CORE_MIN_DIR)/core_min_tb.sv
+
+.PHONY: adders wave-adders view alu8 wave-alu8 view-alu8 \
+        core-min wave-core-min clean
 
 adders:
 	verilator $(VLFLAGS) --top-module adders_tb --Mdir $(BUILD_DIR)/adders_tb $(ADDERS_SRCS) -o sim_adders_tb
@@ -58,6 +67,14 @@ wave-alu8: alu8
 view-alu8:
 	surfer $(ALU8_DIR)/waveform.vcd
 
+core-min:
+	verilator $(VLFLAGS) --top-module core_min_tb --Mdir $(BUILD_DIR)/core_min_tb $(CORE_MIN_SRCS) -o sim_core_min_tb
+	cd $(CORE_MIN_DIR) && $(BUILD_DIR)/core_min_tb/sim_core_min_tb
+
+wave-core-min: core-min
+	surfer $(CORE_MIN_DIR)/core_min_tb.fst
+
 clean:
-	rm -rf $(BUILD_DIR)/adders_tb $(BUILD_DIR)/alu8_tb \
-	       $(ADDERS_DIR)/adders_tb.fst $(ALU8_DIR)/alu8_tb.fst $(ALU8_DIR)/alu8_tb.vcd
+	rm -rf $(BUILD_DIR)/adders_tb $(BUILD_DIR)/alu8_tb $(BUILD_DIR)/core_min_tb \
+	       $(ADDERS_DIR)/adders_tb.fst $(ALU8_DIR)/alu8_tb.fst $(ALU8_DIR)/alu8_tb.vcd \
+	       $(CORE_MIN_DIR)/core_min_tb.fst

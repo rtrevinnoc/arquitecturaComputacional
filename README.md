@@ -9,6 +9,15 @@ Cada tema vive en su propia carpeta, con su RTL y su testbench juntos:
 - **`alu8/`**: ALU de 8 bits (`alu8.v`, `alu8_tb.v`) en Verilog puro (sin
   SystemVerilog), pensada para el presupuesto de pines de un proyecto
   digital de Silicluster v3 (14 entradas / 14 salidas + clk + rst).
+- **`core_min/`**: primer paso hacia un núcleo RV32I completo -- un
+  datapath monociclo mínimo que ejecuta exactamente `add`, `sub` y `addi`:
+  el ALU real (`ArithmeticLogicUnit.sv`), el decodificador
+  (`CoreControlUnit_min.sv`), el generador de inmediato
+  (`ImmediateSignExtend.sv`), el banco de registros (`RegisterFile.sv`),
+  memoria de instrucciones (`InstructionMemory_min.sv`) y el núcleo
+  (`ProcessorCoreMin.sv`), corriendo `program_add_sub_addi.hex`. Esta
+  carpeta se ira ampliando en clases futuras hasta llegar a un RV32I
+  completo.
 
 ## Instalación
 
@@ -91,3 +100,22 @@ make clean
 
 `make alu8` (o `sc_run.py`) compila y corre `alu8_tb`, que imprime
 `PASS`/`FAIL` por cada operación verificada.
+
+### Núcleo RV32I mínimo (`core_min/`)
+
+```bash
+python3 core_min/sc_run.py
+python3 core_min/sc_run.py --wave
+```
+
+Alternativa con Verilator directo:
+
+```bash
+make core-min
+make wave-core-min
+make clean
+```
+
+`make core-min` compila y corre `core_min_tb`, que ejecuta
+`program_add_sub_addi.hex` sobre `ProcessorCoreMin` y verifica el banco de
+registros al final (`PASS`/`FAIL` por registro).
