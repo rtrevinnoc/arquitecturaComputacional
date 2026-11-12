@@ -32,3 +32,13 @@ set_property -dict { PACKAGE_PIN K1  IOSTANDARD LVCMOS33 } [get_ports { led3_r }
 
 ## Canal azul del LED RGB 3 (parpadeo de vida, ~1.5 Hz)
 set_property -dict { PACKAGE_PIN K2  IOSTANDARD LVCMOS33 } [get_ports { led3_b }];
+
+## Reloj del nucleo: 100 MHz / 8 (el monociclo no cierra timing a 100 MHz)
+create_generated_clock -name core_clk -source [get_ports CLK100MHZ] -divide_by 8 [get_pins clk_div_reg[2]/Q]
+
+## USB-UART de la placa (FTDI): linea FPGA -> PC (115200 8N1), traza de instrucciones
+set_property -dict { PACKAGE_PIN D10 IOSTANDARD LVCMOS33 } [get_ports { uart_rxd_out }];
+
+## La salida de retiro (dominio core_clk) solo se muestrea con el reloj del nucleo
+## detenido, asi que no es un camino de un solo ciclo de 100 MHz.
+set_false_path -from [get_clocks core_clk] -to [get_clocks sys_clk_pin]

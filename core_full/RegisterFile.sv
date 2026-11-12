@@ -29,9 +29,9 @@ module RegisterFile #(parameter XLEN = 32, parameter REG_ADDR_WIDTH = 5)
 
     always_comb
     begin
-        assign read_data_1_o    = (read_address_1_i    == 0) ? 0 : register[read_address_1_i];
-        assign read_data_2_o    = (read_address_2_i    == 0) ? 0 : register[read_address_2_i];
-        assign debug_read_data_o = (debug_read_address_i == 0) ? 0 : register[debug_read_address_i];
+        read_data_1_o    = (read_address_1_i    == 0) ? 0 : register[read_address_1_i];
+        read_data_2_o    = (read_address_2_i    == 0) ? 0 : register[read_address_2_i];
+        debug_read_data_o = (debug_read_address_i == 0) ? 0 : register[debug_read_address_i];
     end
 
     always_ff @(negedge clk_i)
